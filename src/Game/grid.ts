@@ -1,20 +1,20 @@
 type Cell = string | undefined;
 
-type Grid = Cell[][];
+export type TGrid = Cell[][];
 
-export class Game {
+export class Grid {
   width: number;
   heigth: number;
-  grid: Grid;
+  grid: TGrid;
 
-  constructor() {
-    this.width = 10;
-    this.heigth = 10;
+  constructor(width: number, heigth: number) {
+    this.width = width;
+    this.heigth = heigth;
     this.grid = this.createGrid();
   }
 
-  createGrid(): Grid {
-    let grid: Grid = [];
+  createGrid(): TGrid {
+    let grid: TGrid = [];
     for (let i = 0; i < this.width; i++) {
       grid[i] = [];
       for (let j = 0; j < this.heigth; j++) {
@@ -22,8 +22,6 @@ export class Game {
       }
     }
     console.log(grid);
-    return grid
+    return grid;
   }
 }
-
-new Game();
