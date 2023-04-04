@@ -1,28 +1,19 @@
-import { Grid, TGrid } from "./grid";
-import { cleanWord, sortWordList } from "./words";
-import { Direction } from "./directions";
-import { getRandomRowCol } from "./random";
+import { Grid, TGrid, Cell } from "./grid";
+import { cleanWord, reverseWord, sortWordList } from "./words";
+import { Direction, getWordCoordinates } from "./directions";
+import { getRandomRowCol, getRandomDirection, randomBool } from "./random";
 
-const words: string[] = ["Teste", "Banana", "Frango"];
-
-const directions: string[] = ["Horizontal", "Vertical", "Diagonal"];
-
-let grid: string[][] = [];
-
+const words: string[] = ["Teste"];
 const maxGridSize = getBiggestWord(words) * 2; //! Da pra deixar o numero * ele mesmo depois sla
 
-for (let i = 0; i < maxGridSize; i++) {
-  grid[i] = [];
-  for (let j = 0; j < maxGridSize; j++) {
-    grid[i][j] = "";
-  }
+generateGrid(words);
+
+
+
+type gameOptions = {
+  allowBackwards: boolean;
+  allowDiagonals: boolean;
 }
-
-const separado = words[0].split('');
-
-//insertWords(separado, grid, 'Diagonal');
-
-//console.log(grid);
 
 function getBiggestWord(wordArray: string[]): number {
   let biggestWordLength = 0
@@ -34,62 +25,63 @@ function getBiggestWord(wordArray: string[]): number {
   return biggestWordLength;
 }
 
-function insertWordsIntoGrid(word: string[], grid: TGrid, options: Object): void {
-  let wordPointerX: number = 0;
-  let wordPointerY: number = 0;
-  //*   check game options
-
-  
-  //*   clone the grid
-  const clonedGrid = grid;
-
-
+function isPlaceable(clonedGrid: TGrid, word: string, direction: Direction, row: number, col: number): boolean {
   for (let i = 0; i < word.length; i++) {
+    const { row: r, col: c } = getWordCoordinates(direction, row, col, i);
 
-    //*   get random direction
-    const direction = getRandomDirection();
-
-    //*   check if word should be reversed or not
-    //if (isReversed && randomBool())
-
-    //*   get random row from the grid (if is diagonal up use row = grid length - row - 1 , also check why)
-    const xCoord = getRandomRowCol(word[i], clonedGrid, true);
-    //*   get random col from the grid
-    const yCoord = getRandomRowCol(word[i], clonedGrid, false);
-    //*   check if the word is placeable
-    //! if (!wordPlaceable())
-
-    //? Case directions
-    if (direction == Direction.Horizontal) {
-      grid[wordPointerX][wordPointerY] = word[i];
-      wordPointerY++;
-    }
-    if (direction == Direction.Vertical) {
-      grid[wordPointerX][wordPointerY] = word[i];
-      wordPointerX++;
-    }
-    if (direction == Direction.DiagonalDown) {
-      grid[wordPointerX][wordPointerY] = word[i];
-      wordPointerX++;
-      wordPointerY++;
-    }
-
-    if (direction == Direction.DiagonalUp) {
-      grid[wordPointerX][wordPointerY] = word[i];
-      wordPointerX++;
-      wordPointerY--;
-    }
-  }
+    //? Get the current cell from the grid and check if it's empty, if it is return false
+    //TODO (maybe you can compare if the current word is equal to the current placed word in the grid)
+    const cell: Cell = clonedGrid[r]![c];
     
-  //*     iterate word letters
+    if (cell != undefined && word[i] != cell) return false;
+  }
 
-  //*     check the letter coordinates by getting the current letter index and the generated row and col and the selected direction
+  return true;
+}
 
-  //*     get the current cell from the grid and check if it's empty, if it is return false (maybe you can compare if the current word is equal to the current placed word in the grid)
+function insertWordIntoGrid(word: string, grid: TGrid, options: gameOptions, maxAttempts: number = 1000): TGrid | undefined {
+  
+  let newGrid: undefined | TGrid = undefined;
+  let attempt = 1;
+  do {
+    const clonedGrid = grid;
 
-  //*     if the iteration finishes, return true
+    let wordToPlace: string;
+    const direction = getRandomDirection(options.allowDiagonals);
+    
+    //? Check if word should be reversed or not and format the word to be placed
+    if (options.allowBackwards && randomBool()) wordToPlace = cleanWord(reverseWord(word));
+    else wordToPlace = cleanWord(word);
+    //? Get random coordinates from the grid
+    let xCoord = getRandomRowCol(wordToPlace, clonedGrid, true);
+    if (direction === Direction.DiagonalUp) {
+      xCoord = grid.length - xCoord - 1;
+    }
+    const yCoord = getRandomRowCol(wordToPlace, clonedGrid, false);
+
+    //? Check if the word is placeable, if it's placeable, place the word
+    if (isPlaceable(clonedGrid, wordToPlace, direction, xCoord, yCoord)) {
+      for (let j = 0; j < wordToPlace.length; j++) {
+        const { row: r, col: c } = getWordCoordinates(direction, xCoord, yCoord, j);
+        clonedGrid[r]![c] = wordToPlace[j];
+      }
+      newGrid = clonedGrid;
+    } else {
+      newGrid = undefined;
+    }
+  } while (newGrid === undefined && attempt++ < maxAttempts);
+
+  if (newGrid !== undefined) {
+    return newGrid;
+  }
+
+  throw new Error(`Could not place word`);
+
+  //TODO - for gods sake make this less chaotic
 
   //*   iterate the word again
+
+  //TODO - Fix the word insertion 
   //*   check letter coordinates again
   //*   place the letter into the grid coordinates
   //*   return the cloned grid
@@ -104,13 +96,29 @@ function generateGrid(words: string[]) {
   const sortedWordList = sortWordList(words.map(cleanWord));
 
   //* create grid
-  const grid = new Grid(maxGridSize, maxGridSize);
+  let grid: TGrid | undefined = new Grid(maxGridSize, maxGridSize).grid;
+
+  const options: gameOptions = {
+    allowBackwards: true,
+    allowDiagonals: true
+  }
 
   //* create placed words array
   const placedWords: string[] = [];
 
   //* place words randomly
-  insertWordsIntoGrid()
+
+  sortedWordList.forEach((w) => {
+    try {
+      grid = insertWordIntoGrid(w, grid as TGrid, options);
+      placedWords.push(w);
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
+  console.log(grid);
+  console.log(placedWords);
   
   //* push placed words into an array
   //* fill blanks
@@ -130,7 +138,7 @@ function generateGrid(words: string[]) {
   ['', '', '', '', '', '', '', '', '', ''],
   ['', '', '', '', '', '', '', '', '', '']
 
-  ['T', 'e', 's', 't', 'e', '',  '',  '', '', ''],
+  ['T', 'e', 's', 't', 'e', '',  '', '', '', ''],
   ['', '', '', '', '', '', '', '', '', ''],
   ['', '', '', '', '', '', '', '', '', ''],
   ['', '', '', '', '', '', '', '', '', ''],
@@ -151,5 +159,7 @@ function generateGrid(words: string[]) {
   ['', '', '', '', '','', '', '', '', ''],
   ['', '', '', '', '','', '', '', '', ''],
   ['', '', '', '', '','', '', '', '', '']
+
+  [undefined, undefined, undefined, undefined, undefined, 'T', undefined, undefined, undefined, undefined],
 
 */

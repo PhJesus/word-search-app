@@ -1,4 +1,4 @@
-type Cell = string | undefined;
+export type Cell = string | undefined;
 
 export type TGrid = Cell[][];
 
@@ -21,7 +21,6 @@ export class Grid {
         grid[i][j] = undefined;
       }
     }
-    console.log(grid);
     return grid;
   }
 }

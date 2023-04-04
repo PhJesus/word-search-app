@@ -1,3 +1,4 @@
+import { Direction } from "./directions";
 import { TGrid } from "./grid";
 
 export const getRandomRowCol = (word: string, grid: TGrid, isRow: boolean): number => {
@@ -10,5 +11,14 @@ export const getRandomRowCol = (word: string, grid: TGrid, isRow: boolean): numb
   if (isRow) max = grid.length - word.length;
   else max = grid[0]!.length - word.length;
 
-  return Math.floor(Math.random() * (Math.ceil(min) - Math.floor(max) + 1)) + Math.ceil(min);
+  return Math.floor(Math.random() * (Math.ceil(max) - Math.floor(min) + 1)) + Math.ceil(min);
 }
+
+export const getRandomDirection = (allowDiagonal = true): Direction => {
+  if (allowDiagonal)
+    return Math.random() * 4
+  else
+    return Math.random() * 2 
+}
+
+export const randomBool = () => Math.random() >= 0.5;
