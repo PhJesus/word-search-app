@@ -16,9 +16,9 @@ export const getRandomRowCol = (word: string, grid: TGrid, isRow: boolean): numb
 
 export const getRandomDirection = (allowDiagonal = true): Direction => {
   if (allowDiagonal)
-    return Math.random() * 4
+    return Math.floor(Math.random() * 4)
   else
-    return Math.random() * 2 
+    return Math.floor(Math.random() * 2)
 }
 
 export const randomBool = () => Math.random() >= 0.5;

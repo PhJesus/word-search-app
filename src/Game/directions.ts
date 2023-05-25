@@ -10,14 +10,20 @@ export const getWordCoordinates = (direction: Direction, row: number, col: numbe
   let c = col;
 
   switch (true) {
-    case (direction === Direction.Horizontal || direction === Direction.DiagonalDown):
+    case (direction === Direction.Horizontal):
       r += index;
+      break;
+    case (direction === Direction.Vertical):
+      c+= index;
+      break;
+    case (direction === Direction.DiagonalDown):
+      r += index;
+      c += index;
+      break;
     case (direction === Direction.DiagonalUp):
       r -= index;
+      c += index;
+      break;
   }
-
-  if (direction === Direction.Vertical || direction === Direction.DiagonalDown || direction === Direction.DiagonalUp)
-    c += index;
-
   return { row: r, col: c };
 }

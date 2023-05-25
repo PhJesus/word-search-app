@@ -1,14 +1,12 @@
-import { Grid, TGrid, Cell } from "./grid";
+import { Generator, TGrid, Cell } from "./grid";
 import { cleanWord, reverseWord, sortWordList } from "./words";
 import { Direction, getWordCoordinates } from "./directions";
 import { getRandomRowCol, getRandomDirection, randomBool } from "./random";
 
-const words: string[] = ["Teste"];
-const maxGridSize = getBiggestWord(words) * 2; //! Da pra deixar o numero * ele mesmo depois sla
+const words: string[] = ["Gato", "Cachorro", "Boi", "Vaca", "Cavalo", "Gorila", "Touro", "Abelha", "Girafa", "Passaro", "Anta"];
+const maxGridSize = getBiggestWord(words) * 2;
 
 generateGrid(words);
-
-
 
 type gameOptions = {
   allowBackwards: boolean;
@@ -32,7 +30,7 @@ function isPlaceable(clonedGrid: TGrid, word: string, direction: Direction, row:
     //? Get the current cell from the grid and check if it's empty, if it is return false
     //TODO (maybe you can compare if the current word is equal to the current placed word in the grid)
     const cell: Cell = clonedGrid[r]![c];
-    
+    console.log(word[i]);
     if (cell != undefined && word[i] != cell) return false;
   }
 
@@ -40,10 +38,10 @@ function isPlaceable(clonedGrid: TGrid, word: string, direction: Direction, row:
 }
 
 function insertWordIntoGrid(word: string, grid: TGrid, options: gameOptions, maxAttempts: number = 1000): TGrid | undefined {
-  
   let newGrid: undefined | TGrid = undefined;
   let attempt = 1;
   do {
+    console.log(attempt);
     const clonedGrid = grid;
 
     let wordToPlace: string;
@@ -52,6 +50,7 @@ function insertWordIntoGrid(word: string, grid: TGrid, options: gameOptions, max
     //? Check if word should be reversed or not and format the word to be placed
     if (options.allowBackwards && randomBool()) wordToPlace = cleanWord(reverseWord(word));
     else wordToPlace = cleanWord(word);
+
     //? Get random coordinates from the grid
     let xCoord = getRandomRowCol(wordToPlace, clonedGrid, true);
     if (direction === Direction.DiagonalUp) {
@@ -60,6 +59,7 @@ function insertWordIntoGrid(word: string, grid: TGrid, options: gameOptions, max
     const yCoord = getRandomRowCol(wordToPlace, clonedGrid, false);
 
     //? Check if the word is placeable, if it's placeable, place the word
+    
     if (isPlaceable(clonedGrid, wordToPlace, direction, xCoord, yCoord)) {
       for (let j = 0; j < wordToPlace.length; j++) {
         const { row: r, col: c } = getWordCoordinates(direction, xCoord, yCoord, j);
@@ -96,7 +96,7 @@ function generateGrid(words: string[]) {
   const sortedWordList = sortWordList(words.map(cleanWord));
 
   //* create grid
-  let grid: TGrid | undefined = new Grid(maxGridSize, maxGridSize).grid;
+  let grid: TGrid | undefined = new Generator(maxGridSize, maxGridSize).grid;
 
   const options: gameOptions = {
     allowBackwards: true,
@@ -117,49 +117,43 @@ function generateGrid(words: string[]) {
     }
   });
 
-  console.log(grid);
+  const alphabet: string[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+  //printMatrix(grid);
+
+  grid = fillEmpty(grid, alphabet);
+
+
+
+
   console.log(placedWords);
+
+  printMatrix(grid);
   
   //* push placed words into an array
   //* fill blanks
   //* return grid and placedwords
 }
 
-/*
+function fillEmpty(grid: TGrid, fillLetters: string[]): TGrid {
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
+      if (grid[i][j] == undefined) {
+        grid[i][j] = fillLetters[Math.floor(Math.random() * fillLetters.length)];
+      }
+    }
+  }
+  return grid;
+}
 
-  ['T', '', '', '', '', '',  '', '', '', ''],
-  ['e', '', '', '', '', '',  '', '', '', ''],
-  ['s', '', '', '', '', '',  '', '', '', ''],
-  ['t', '', '', '', '', '',  '', '', '', ''],
-  ['e', '', '', '', '', '',  '', '', '', ''],
-  ['', '', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', '', '']
-
-  ['T', 'e', 's', 't', 'e', '',  '', '', '', ''],
-  ['', '', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', '', '']
-
-  ['T', '', '', '', '','',  '', '', '', ''],
-  ['', 'e', '', '', '','', '',  '', '', ''],
-  ['', '', 's', '', '','', '', '',  '', ''],
-  ['', '', '', 't', '','', '', '', '',  ''],
-  ['', '', '', '', 'e','', '', '', '', ''],
-  ['', '', '', '', '','', '', '', '', ''],
-  ['', '', '', '', '','', '', '', '', ''],
-  ['', '', '', '', '','', '', '', '', ''],
-  ['', '', '', '', '','', '', '', '', ''],
-  ['', '', '', '', '','', '', '', '', '']
-
-  [undefined, undefined, undefined, undefined, undefined, 'T', undefined, undefined, undefined, undefined],
-
-*/
+function printMatrix(grid: TGrid) {
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
+      if (grid[i][j] == undefined) {
+        process.stdout.write(` - `);
+      } else {
+        process.stdout.write(` ${grid[i][j]} `);
+      }
+    }
+    console.log('');
+  } 
+}

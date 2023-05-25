@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/lPedru/word-search-app/issues"
   },
-  "homepage": "https://github.com/lPedru/word-search-app#readme"
+  "homepage": "https://github.com/lPedru/word-search-app#readme",
+  "devDependencies": {
+    "@types/node": "^20.2.3"
+  }
 }
