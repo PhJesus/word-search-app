@@ -11,6 +11,16 @@ export type gameOptions = {
   allowDiagonals: boolean;
 }
 
+export type configParams = {
+  allowBackwards: boolean;
+  allowDiagonals: boolean;
+  size: {
+    x: number,
+    y: number
+  },
+  words?: string[]
+}
+
 const wordArr: string[] = ["Gato", "Cachorro", "Boi", "Vaca", "Cavalo", "Gorila", "Touro", "Abelha", "Girafa", "Passaro", "Anta", "Preguiça", "Cabra"];
 
 export class Generator {
@@ -21,12 +31,12 @@ export class Generator {
   words: Words;
   maxAttempts: number = 1000;
 
-  constructor(width: number, heigth: number) {
-    this.width = width;
-    this.heigth = heigth;
-    this.words = new Words(wordArr);;
+  constructor(configParams: configParams) {
+    this.width = configParams.size.x;
+    this.heigth = configParams.size.y;
+    this.words = new Words(wordArr);
     this.options = { allowBackwards: true, allowDiagonals: true };
-    this.grid = this.Generate()
+    this.grid = this.Generate();
   }
 
   createGrid() {
@@ -43,8 +53,8 @@ export class Generator {
     this.createGrid();
     this.InsertWords();
     this.FillEmpty();
-    this.PrintGrid();
-    this.PrintWords();
+    //this.PrintGrid();
+    //this.PrintWords();
     return this.grid;
   }
 
@@ -127,4 +137,14 @@ export class Generator {
   }
 }
 
-const gridors = new Generator(30, 30);
+const gridors = new Generator({
+  allowBackwards: true,
+  allowDiagonals: true,
+  size: {
+    x: 30,
+    y: 30
+  }
+});
+
+console.log(gridors.grid);
+console.log(gridors.words.selectedWords);
